@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="service.vdr.yavdr-tools"
+       name="yaVDR Tools (Experimential)"
+       version="0.0.1"
+       provider-name="seahawk1986">
+  <requires>
+    <import addon="xbmc.python" version="1.0" start="login|startup"/>
+  </requires>
+  <extension point="xbmc.service" library="default.py"/>
+  <extension point="xbmc.addon.metadata">
+    <platform>linux</platform>
+    <summary lang="en">Experimental service for yaVDR to allow coordinated shutdown and powersave for XBMC and VDR</summary>
+    <summary lang="de">Experimenteller Service für yaVDR um das Herunterfahren/Energiesparen von XBMC und VDR zu koordinieren</summary>
+    <description lang="en">This service handles automated powersave and wakeup operations, in cooperation with a VDR backend. You will find details in the "Changelog"</description>
+    <description lang="de">Dieser Dienst koordiniert die das Ausschalten von VDR und XBMC.</description>
+    </extension>
+</addon>

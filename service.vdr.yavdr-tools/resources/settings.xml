@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<settings>
+   <setting id="vdrps_sleepmode_after" type="enum" label="30013" values="5 Min|10 Min|15 Min|20 Min|25 Min|30 Min|40 Min|50 Min|60 Min|90 Min|120 Min|180 Min|240 Min|300 Min|360 Min|420 Min|480 Min|540 Min|600 Min" default="10"/>   
+   <setting id="vdrps_overrun" type="enum" label="30014" values="1 Min|2 Min|5 Min|10 Min|15 Min|20 Min" default="2"/>
+</settings>
