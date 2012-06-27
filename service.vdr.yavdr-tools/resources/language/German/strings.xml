@@ -9,6 +9,6 @@
     <string id="30012">Abschalten bei Untätigkeit</string>
     <string id="30013">Abschalten nach</string>
     <string id="30014">Nachlauf nach XBMC-Wiedergabe</string>
-    <string id="30020">Täglich wecken</string>
-    <string id="30021">Uhrzeit für tägliches Wecken (SS:MM)</string>
+    <string id="30020">Nutze Idle-Timeout</string>
+    <string id="30021">Zeige Timeout Meldungen</string>
 </strings>

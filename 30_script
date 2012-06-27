@@ -28,6 +28,7 @@ case $EXIT_STATUS in
             else
 	        signal-event reset-display-rate
                 /sbin/initctl emit --no-wait vdr-frontend-restart
+                sleep 5
                 vdr-dbus-send /Remote remote.HitKey string:'Power' || /bin/true
             fi
             ;;

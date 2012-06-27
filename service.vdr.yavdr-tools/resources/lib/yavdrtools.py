@@ -16,10 +16,12 @@ class Main:
     _realIdleTime = 0
     _lastPlaying = False
     _isPlaying = False
+    _notifications = False
+    _active = False
 
     # main routine
     def __init__(self):
-        print "vdr.yavdrtools: Plugin started"        
+        #self.debug("Plugin started")
         self.getSettings()
         #for element in  dir(xbmc):
         #    print element
@@ -29,13 +31,14 @@ class Main:
             active.write("1")
         # main loop
         while (not xbmc.abortRequested):
-            if self._counter > 9:
+            self.getSettings()
+            if self._counter > 4:
                 self._counter = 0
             else:
                 self._counter += 1
             # time warp calculations demands to have our own idle timers
             self._lastIdleTime = self._idleTime
-            print "lastIdleTime = %s"%self._lastIdleTime
+            self.debug("lastIdleTime = %s"%self._lastIdleTime)
             self._idleTime = xbmc.getGlobalIdleTime()
             if (self._idleTime > self._lastIdleTime):
                 self._realIdleTime = self._realIdleTime + (self._idleTime - self._lastIdleTime)
@@ -51,46 +54,59 @@ class Main:
             if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['vdrps_sleepmode_after']):
                 self._realIdleTime = self.settings['vdrps_sleepmode_after'] - self.settings['vdrps_overrun']
                 #print "vdr.powersave: playback stopped!"
-                xbmc.executebuiltin(u"Notification('Inactivity timeout','press key to abort')")
+                if self.settings['notifications'] == "true":
+                  xbmc.executebuiltin(u"Notification('Inactivity timeout','press key to abort')")
             # powersave checks ...
-            print self._counter
-            if (self._realIdleTime + 300 >= self.settings['vdrps_sleepmode_after']) and self._counter == 9 and self._isPlaying == False:
+            self.debug(self._counter)
+            vdridle = self.getVDRidle()
+            if (self._realIdleTime + 120 >= self.settings['vdrps_sleepmode_after']) and self._counter == 9 and self._isPlaying == False and vdridle:
+              if self.settings['notifications'] == "true":
                 xbmc.executebuiltin(u"Notification('Inactivity timeout in %s seconds','press key to abort')"%(int(self.settings['vdrps_sleepmode_after']) - int(self._realIdleTime)))
-            if (self._realIdleTime >= self.settings['vdrps_sleepmode_after']):
-                print "powersafe-check"
+            if (self._realIdleTime >= self.settings['vdrps_sleepmode_after']) and self.settings['active'] == "true":
+                self.debug("powersafe-check")
                 with open("/tmp/xbmc-active","w") as active:
                         active.write("1")
                 # sleeping time already?
                 if (self._isPlaying):
-                    print "vdr.powersave: powersave postponed - xbmc is playing ..."
+                    self.debug("powersave postponed - xbmc is playing ...")
                     with open("/tmp/xbmc-active","w") as active:
                         active.write("1")
                 else:
                     with open("/tmp/xbmc-active","w") as active:
                         active.write("0")
-                    print "ask if VDR is ready to shutdown"
-                    if self.getVDRidle():
+                    self.debug("ask if VDR is ready to shutdown")
+                    if vdridle:
                         with open("/tmp/xbmc-shutdown","w") as shutdown:
                             shutdown.write("1")
                         xbmc.executebuiltin('Quit')
                     else:
                         with open("/tmp/xbmc-shutdown","w") as shutdown:
                             shutdown.write("0")
-            
+            else:
+                with open("/tmp/xbmc-active","w") as active:
+                        active.write("1")
+                with open("/tmp/xbmc-shutdown","w") as shutdown:
+                        shutdown.write("0")             
             # sleep a little ...
             xbmc.sleep(self._sleep_interval)
 
-        print "vdr.yavdrtools: Plugin exited"
+        self.debug("vdr.yavdrtools: Plugin exited")
         exit()
         
         
     # get settings from xbmc
     def getSettings(self):
-        print "vdr.yavdrtools: Getting settings ..."
         self.settings = {}
         self.settings['vdrps_overrun'] = self._enum_overrun[int(Addon.getSetting('vdrps_overrun'))] * 60
         self.settings['vdrps_sleepmode_after'] = self._enum_idle[int(Addon.getSetting('vdrps_sleepmode_after'))] * 60
+        self.settings['active'] = Addon.getSetting('enable_timeout')
+        self.settings['notifications'] = Addon.getSetting('enable_notifications')
+        self.settings['debug'] = Addon.getSetting('enable_debug')
 
+
+    def debug(self, message):
+        if self.settings['debug'] == "true":
+            print "debug vdr.yavdrtools: %s"%(message)
 
             
     def getVDRidle(self, mode=True):
@@ -103,19 +119,19 @@ class Main:
         status, message, code, msg = self.ask_vdridle.ConfirmShutdown(mode)
         if int(status) in [250,990]:
             self._VDRisidle = True
-            print "VDR ready to shutdown"
+            self.debug("VDR ready to shutdown")
             return True
         else:
             #xbmc.executebuiltin("Notification('yaVDR Tools',%s)"%(message))
             self.send_message.QueueMessage(message)
-            print "VDR not ready to shutdown"
-            print "got answer: ", status, message
+            self.debug("VDR not ready to shutdown")
+            self.debug("got answer: %s: %s"%(status, message))
             if int(status) == 903:
-                print "VDR is recording"
+                self.debug("VDR is recording")
                 self._isRecording = True
             elif int(status) == 904:
-                print "VDR recording is pending"
+                self.debug("VDR recording is pending")
             elif int(status) in [905,906]:
-                print "VDR plugin is active"
+                self.debug("VDR plugin is active")
             return False
             

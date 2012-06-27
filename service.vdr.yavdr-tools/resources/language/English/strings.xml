@@ -9,6 +9,6 @@
     <string id="30012">Powersave when idle</string>
     <string id="30013">Initiate Powersafe after</string>
     <string id="30014">Overrun after XBMC-playback</string>
-    <string id="30020">Daily wakeup</string>
-    <string id="30021">Daily wakeup time (HH:MM)</string>
+    <string id="30020">Enable idle timeout</string>
+    <string id="30021">Enable timeout notifications</string>
 </strings>
