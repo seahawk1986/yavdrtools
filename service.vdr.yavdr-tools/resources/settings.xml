@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <settings>
+ <category label="30012">
    <setting id="enable_timeout" type="bool" label="30020" default="false" />
-   <setting id="vdrps_sleepmode_after" type="enum" label="30013" values="5 Min|10 Min|15 Min|20 Min|25 Min|30 Min|40 Min|50 Min|60 Min|90 Min|120 Min|180 Min|240 Min|300 Min|360 Min|420 Min|480 Min|540 Min|600 Min" default="60 Min" enable="eq(-1,true)"/>   
-   <setting id="vdrps_overrun" type="enum" label="30014" values="1 Min|2 Min|5 Min|10 Min|15 Min|20 Min" default="2" enable="eq(-2,true)"/>
+   <setting id="MinUserInactivity" type="number" label="30013" subsetting="true" default=300 option="int" enable="eq(-1,true)"/>   
+   <setting id="overrun" type="enum" label="30014" subsetting="true" values="1 Min|2 Min|5 Min|10 Min|15 Min|20 Min" default="2" enable="eq(-2,true)"/>
+   <setting id="MinEventTimeout" type="number" label="30015" subsetting="true" default=30 option="int"  enable="eq(-3,true)"/>
    <setting id="enable_notifications" type="bool" label="30021" default="false" />
    <setting id="enable_debug" type="bool" label="Debug" default="false" />
+ </category>
 </settings>

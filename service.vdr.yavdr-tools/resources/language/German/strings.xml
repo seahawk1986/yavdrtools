@@ -6,9 +6,10 @@
     <string id="30003">Aufwach-Kommando (cmd [timestamp])</string>
     <string id="30010">Abmelden bei Untätigkeit</string>
     <string id="30011">Abmelden nach</string>
-    <string id="30012">Abschalten bei Untätigkeit</string>
-    <string id="30013">Abschalten nach</string>
-    <string id="30014">Nachlauf nach XBMC-Wiedergabe</string>
-    <string id="30020">Nutze Idle-Timeout</string>
-    <string id="30021">Zeige Timeout Meldungen</string>
+    <string id="30012">Energiesparen</string>
+    <string id="30013">Abschalten bei Inaktivität in Minuten</string>
+    <string id="30014">Verzögere Ausschalten nach Wiedergabe</string>
+    <string id="30015">Brückenzeit zwischen Timern in Minuten</string>
+    <string id="30020">Abschalten bei Inaktivität</string>
+    <string id="30021">Meldungen vor dem Ausschalten anzeigen</string>
 </strings>

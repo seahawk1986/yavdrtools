@@ -6,9 +6,10 @@
     <string id="30003">Wakeuptime command (cmd [timestamp])</string>
     <string id="30010">Logout when idle</string>
     <string id="30011">Logout after</string>
-    <string id="30012">Powersave when idle</string>
+    <string id="30012">Powersave</string>
     <string id="30013">Initiate Powersafe after</string>
-    <string id="30014">Overrun after XBMC-playback</string>
-    <string id="30020">Enable idle timeout</string>
+    <string id="30014">Wait for powersafe after XBMC-playback</string>
+    <string id="30015">Stay awake if next timer starts in</string>
+    <string id="30020">Powersafe when idle (all values in minutes)</string>
     <string id="30021">Enable timeout notifications</string>
 </strings>
