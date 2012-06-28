@@ -36,8 +36,8 @@ class Main:
         # get inactivity timeouts
         self.MinUserInactivity, max, message = self.vdrSetupValue.Get('MinUserInactivity')
         self.MinEventTimeout, max, message = self.vdrSetupValue.Get('MinEventTimeout')
-        print "VDR UserInactivity:", int(self.MinUserInactivity)
-        print "XBMC UserInactivity:", int(self.settings['MinUserInactivity'])/60
+        self.debug("VDR UserInactivity: %s"%(self.MinUserInactivity))
+        self.debug("XBMC UserInactivity: %s"%(int(self.settings['MinUserInactivity'])/60))
         if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
             try:
                 Addon.setSetting(id="MinUserInactivity", value=str(self.MinUserInactivity))
@@ -86,7 +86,7 @@ class Main:
             # Otherwise xbmc could sleep instantly at the end of a movie
             if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['MinUserInactivity']):
                 self._realIdleTime = self.settings['MinUserInactivity'] - self.settings['overrun']
-                #print "vdr.powersave: playback stopped!"
+                self.debug("vdr.powersave: playback stopped!")
                 if self.settings['notifications'] == "true":
                   xbmc.executebuiltin(u"Notification('Inactivity timeout','press key to abort')")
             # powersave checks ...
@@ -141,14 +141,12 @@ class Main:
     def updateVDRSettings(self):
 	if int(self.settings['MinUserInactivity'])/60 != self.MinUserInactivity:
             val = int(self.settings['MinUserInactivity'])/60
-            #print self.vdrSetupValue(dbus.Int32(value))
-            print subprocess.Popen(["/usr/bin/vdr-dbus-send", "/Setup", "setup.Set", 'string:MinUserInactivity', 'int32:%s'%(val)])
+            self.debug(self.vdrSetupValue.Set(dbus.String("MinUserInactivity"), dbus.Int32(val), signature="si"))
             self.debug("changed MinUserInactivity to %s"%(int(self.settings['MinUserInactivity'])/60))
             self.MinUserInactivity = int(self.settings['MinUserInactivity'])/60
         if int(self.settings['MinEventTimeout'])/60 != self.MinEventTimeout:
             aval = int(self.settings['MinEventTimeout'])/60
-            #self.vdrSetupValue.Set('MinEventTimeout', (dbus.Int32(self.settings['MinEventTimeout'])/60))
-            print subprocess.Popen(["/usr/bin/vdr-dbus-send", "/Setup", "setup.Set", 'string:MinEventTimeout', 'int32:%s'%(aval)])
+            self.debug(self.vdrSetupValue.Set(dbus.String('MinEventTimeout'), dbus.Int32(aval), signature="si"))
             self.debug("changed MinEventTimeout to %s"%(int(self.settings['MinEventTimeout']/60)))
             self.MinEventTimeout = int(self.settings['MinEventTimeout'])/60
 
