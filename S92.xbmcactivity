@@ -1,0 +1,11 @@
+if [ -e /tmp/xbmc-active ]; then
+
+	if [ "$(grep -U "1" /tmp/xbmc-active)" ]; then
+                MESSAGE="XBMC active"
+		echo "ABORT_MESSAGE=\"$MESSAGE\""
+		exit 1
+	else
+		echo "XBMC INACTIVE"
+		exit 0
+	fi
+fi

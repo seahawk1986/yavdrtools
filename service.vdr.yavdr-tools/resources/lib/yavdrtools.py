@@ -16,7 +16,6 @@ class Main:
     _realIdleTime = 0
     _lastPlaying = False
     _isPlaying = False
-    _notifications = False
     _manualStart = False
     _xbmcStatus = 1
     _xbmcShutdown = 0
@@ -65,10 +64,6 @@ class Main:
         while (not xbmc.abortRequested):
             self.getSettings()
             self.updateVDRSettings()
-            if self._counter > 4:
-                self._counter = 0
-            else:
-                self._counter += 1
             # time warp calculations demands to have our own idle timers
             self._lastIdleTime = self._idleTime
             self.debug("lastIdleTime = %s"%self._lastIdleTime)
@@ -87,46 +82,41 @@ class Main:
             if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['MinUserInactivity']):
                 self._realIdleTime = self.settings['MinUserInactivity'] - self.settings['overrun']
                 self.debug("vdr.powersave: playback stopped!")
-                if self.settings['notifications'] == "true":
-                  xbmc.executebuiltin(u"Notification('Inactivity timeout','press key to abort')")
             # powersave checks ...
             self.debug(self._counter)
-            vdridle = self.getVDRidle()
-            if (self._realIdleTime + 120 >= self.settings['MinUserInactivity']) and self._counter == 9 and self._isPlaying == False and vdridle:
-              if self.settings['notifications'] == "true":
-                xbmc.executebuiltin(u"Notification('Inactivity timeout in %s seconds','press key to abort')"%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)))
-            if not self.idleCheck(self.settings['MinUserInactivity']):
+            if (self._realIdleTime + 120 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
+                self.xbmcStatus(0)
+                if self.getVDRidle():
+                    self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
+                if (self._realIdleTime >= self.settings['MinUserInactivity']):
+            	    self.idleCheck(self.settings['MinUserInactivity'])
+                xbmc.sleep(self._sleep_interval/2)
+            else:
                 xbmc.sleep(self._sleep_interval)
 
         self.debug("vdr.yavdrtools: Plugin exit on request")
         exit()
         
     def idleCheck(self, timeout):
-        if (self._realIdleTime >= timeout and self.settings['active'] == "true"):
-            self.debug("powersafe-check")
-            self.xbmcStatus("1")
+        if self.settings['active'] == "true":
+            self.debug("powersafe-check, timeout is set to %s"%(timeout))
             # sleeping time already?
-            if (self._isPlaying):
+            if (self._isPlaying) or (self._realIdleTime <= timeout):
                 self.debug("powersave postponed - xbmc is playing ...")
                 self.xbmcStatus(1)
+                return False
             else:
                 self.xbmcStatus(0)
                 self.debug("ask if VDR is ready to shutdown")
                 vdridle = self.getVDRidle()
                 if vdridle:
                     self.xbmcShutdown(1)
+                    self.xbmcNotify('Point of no return', 'Good Bye')
                     xbmc.executebuiltin('Quit')
+                    return True
                 else:
                     self.xbmcShutdown(0)
-            
-        else:
-            self.xbmcStatus(1)
-            self.xbmcShutdown(0)
-        if self._xbmcStatus == 0 and self._xbmcShutdown == 1:
-            exit()
-            return True
-        else:
-            return False
+                    return False
     
     def getSettings(self):
         '''get settings from xbmc'''
@@ -141,14 +131,24 @@ class Main:
     def updateVDRSettings(self):
 	if int(self.settings['MinUserInactivity'])/60 != self.MinUserInactivity:
             val = int(self.settings['MinUserInactivity'])/60
-            self.debug(self.vdrSetupValue.Set(dbus.String("MinUserInactivity"), dbus.Int32(val), signature="si"))
+            self.setVDRSetting("MinUserInactivity", val)
             self.debug("changed MinUserInactivity to %s"%(int(self.settings['MinUserInactivity'])/60))
             self.MinUserInactivity = int(self.settings['MinUserInactivity'])/60
         if int(self.settings['MinEventTimeout'])/60 != self.MinEventTimeout:
             aval = int(self.settings['MinEventTimeout'])/60
-            self.debug(self.vdrSetupValue.Set(dbus.String('MinEventTimeout'), dbus.Int32(aval), signature="si"))
+            self.setVDRSetting('MinEventTimeout', aval)
             self.debug("changed MinEventTimeout to %s"%(int(self.settings['MinEventTimeout']/60)))
             self.MinEventTimeout = int(self.settings['MinEventTimeout'])/60
+    
+    def setVDRSetting(self, setting, value, sig="si"):
+        """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""
+        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+        self.debug(answer)
+
+    def xbmcNotify(self, title="yaVDR Tools",  message="Test"):
+        """Send Notication to User via XBMC"""
+        if self.settings['notifications'] == "true":
+            xbmc.executebuiltin(u"Notification('%s','%s')"%(title,message))
 
     def debug(self, message):
         '''write debug messages to xbmc.log'''
@@ -170,10 +170,11 @@ class Main:
         self.bus = dbus.SystemBus()
         self.proxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
         self.msgproxy =  self.bus.get_object("de.tvdr.vdr","/Skin")
-        self.send_message = dbus.Interface(self.msgproxy, "de.tvdr.vdr.skin")
+        #self.send_message = dbus.Interface(self.msgproxy, "de.tvdr.vdr.skin")
         #/Skin skin.QueueMessage string:'message text'
         self.ask_vdridle = dbus.Interface(self.proxy,"de.tvdr.vdr.shutdown")
         status, message, code, msg = self.ask_vdridle.ConfirmShutdown(mode)
+        self.debug("VDR returned: %s"%status)
         if int(status) in [250,990]:
             self._VDRisidle = True
             self.debug("VDR ready to shutdown")
