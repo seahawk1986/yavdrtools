@@ -21,8 +21,6 @@ case $EXIT_STATUS in
 	<?cs /if ?>
         ;;
     *)
-        signal-event reset-display-rate
-        
         case "$(cat /tmp/xbmc-shutdown)" in 
           1)
             <?cs if:(vdr.frontend == "xbmc") ?>
@@ -35,6 +33,7 @@ case $EXIT_STATUS in
             <?cs /if ?>
             ;;
           *)
+	    signal-event reset-display-rate
             /sbin/initctl emit --no-wait vdr-frontend-restart
             ;;
         esac
