@@ -5,21 +5,20 @@ logger -t "XBMC" "XBMC exit with exit status $EXIT_STATUS, $EXIT_SIGNAL, ENV: $(
 # in case we want to shutdown do it, else make sure default rate is set in all cases
 case $EXIT_STATUS in
     64|66)
+	<?cs if:(vdr.backend == "disabled") ?>
+        poweroff
+	<?cs else ?>
         case "$(vdr-dbus-send /Shutdown shutdown.ConfirmShutdown boolean:true | grep -m 1 int32 | egrep -e "[[:digit:]]{3}" -o)" in 
             990|250)
                 logger -t "xbmc-exit.conf" "VDR ready to shutdown, sending POWER signal to VDR"
-                <?cs if:(vdr.backend == "disabled") ?>
-        	poweroff
-        	<?cs else ?>
                 vdr-dbus-send /Remote remote.HitKey string:'Power' || /bin/true
-		<?cs /if ?>
                 ;; 
             *)  logger -t "xbmc-exit.conf" "can't shutdown, restarting XBMC"
                 signal-event reset-display-rate
                 /sbin/initctl emit --no-wait vdr-frontend-restart
                 ;; 
         esac
-       
+	<?cs /if ?>
         ;;
     *)
         signal-event reset-display-rate
