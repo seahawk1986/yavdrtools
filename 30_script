@@ -25,17 +25,16 @@ case $EXIT_STATUS in
         
         case "$(cat /tmp/xbmc-shutdown)" in 
           1)
-            if [ "$(dbget vdr.frontend)" == "xbmc" ]; then
+            <?cs if:(vdr.frontend == "xbmc") ?>
                 vdr-dbus-send /Remote remote.HitKey string:'Power' || /bin/true
-            else
+            <?cs else ?>
 	        signal-event reset-display-rate
-                /sbin/initctl emit --no-wait vdr-frontend-restart
-                sleep 30
+                /sbin/initctl emit vdr-frontend-restart
+                sleep 5
                 vdr-dbus-send /Remote remote.HitKey string:'Power' || /bin/true
-            fi
+            <?cs /if ?>
             ;;
           *)
-            signal-event reset-display-rate
             /sbin/initctl emit --no-wait vdr-frontend-restart
             ;;
         esac
