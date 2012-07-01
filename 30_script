@@ -39,8 +39,9 @@ case $EXIT_STATUS in
         esac
         ;;
 esac
+# kill xbmc.bin ghost process
 if [ $(pidof xbmc.bin) ]; then
-killall -9 xbmc.bin ||:
+	killall -9 xbmc.bin ||:
 fi
 #clean up
 rm -f /tmp/xbmc-active
