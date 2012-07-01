@@ -40,7 +40,7 @@ case $EXIT_STATUS in
         ;;
 esac
 # kill xbmc.bin ghost process
-if [ $(pidof xbmc.bin) ]; then
+if pidof xbmc.bin &> /dev/null ; then
 	killall -9 xbmc.bin ||:
 fi
 #clean up
