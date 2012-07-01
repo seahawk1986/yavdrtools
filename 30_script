@@ -40,13 +40,9 @@ case $EXIT_STATUS in
         ;;
 esac
 if [ $(pidof xbmc.bin) ]; then
-killall -9 xbmc.bin
+killall -9 xbmc.bin ||:
 fi
 #clean up
-if [ -e /tmp/xbmc-active ]; then
-rm /tmp/xbmc-active
-fi
-if [ -e /tmp/xbmc-shutdown ]; then
-rm /tmp/xbmc-shutdown
-fi
+rm -f /tmp/xbmc-active
+rm -f /tmp/xbmc-shutdown
 end script
