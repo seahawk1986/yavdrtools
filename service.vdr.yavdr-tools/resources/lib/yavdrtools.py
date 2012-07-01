@@ -84,7 +84,7 @@ class Main:
                 self.debug("vdr.powersave: playback stopped!")
             # powersave checks ...
             self.debug(self._counter)
-            if (self._realIdleTime + 120 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
+            if (self._realIdleTime + 60 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
                 self.xbmcStatus(0)
                 if self.getVDRidle():
                     self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
