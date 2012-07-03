@@ -73,7 +73,7 @@ class Main:
         self._manualStart = self.ask_vdrshutdown.ManualStart()
         self.debug("Manual Start: %s"%( self._manualStart))
         while (not xbmc.abortRequested):
-            if self._manualStart == False or self._exitrequested == 1:
+            if (self._manualStart == False and self.MinEventTimeout > 0) or self._exitrequested == 1:
                 self.debug("Mode: Timer start or exit requested")
                 self._idleTime = 0
                 while not (self._isPlaying):
