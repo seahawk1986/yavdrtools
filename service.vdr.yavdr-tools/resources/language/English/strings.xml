@@ -11,5 +11,5 @@
     <string id="30014">Wait for powersafe after XBMC-playback</string>
     <string id="30015">Stay awake if next timer starts in</string>
     <string id="30020">Powersafe when idle (all values in minutes)</string>
-    <string id="30021">Enable timeout notifications</string>
+    <string id="30021">Enable notifications</string>
 </strings>
