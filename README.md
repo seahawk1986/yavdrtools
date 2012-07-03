@@ -10,3 +10,5 @@ sudo process-template /etc/init/xbmc-exit.conf
 
 Copy S92.xbmcactivity to /usr/share/vdr/shutdown-hooks/ and deactivate XBMC Option in yaVDR Webfrontend in the lifeguard-addon settings
 
+If XBMC is set as default frontend, replaceaction for <power> in your remote.xml with this call:
+<power>XBMC.RunScript(service.vdr.yavdr-tools,"check")</power>

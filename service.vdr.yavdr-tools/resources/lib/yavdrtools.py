@@ -19,6 +19,7 @@ class Main:
     _manualStart = False
     _xbmcStatus = 1
     _xbmcShutdown = 0
+    _exitrequested = 0
 
     # main routine
     def __init__(self):
@@ -27,9 +28,7 @@ class Main:
         # define dbus2vdr communication elements
         self.bus = dbus.SystemBus()
         self.shutdownproxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
-        self.msgproxy =  self.bus.get_object("de.tvdr.vdr","/Skin")
         self.setupproxy = self.bus.get_object("de.tvdr.vdr","/Setup")
-        self.send_message = dbus.Interface(self.msgproxy, "de.tvdr.vdr.skin")
         self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
         self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
         # get inactivity timeouts
@@ -37,7 +36,8 @@ class Main:
         self.MinEventTimeout, max, message = self.vdrSetupValue.Get('MinEventTimeout')
         self.debug("VDR UserInactivity: %s"%(self.MinUserInactivity))
         self.debug("XBMC UserInactivity: %s"%(int(self.settings['MinUserInactivity'])/60))
-        
+        with open('/tmp/shutdownrequest','w') as f:
+                        f.write("0") 
         # Check if Addon called by RunScript(script[,args]*)
         try:
             if sys.argv[1] == "check":
@@ -47,12 +47,16 @@ class Main:
                 idle, message = self.getVDRidle()
                 if idle:
                     self.xbmcNotify(message="Shutdown initiated")
-                    xbmc.sleep(1)
+                    xbmc.sleep(2000)
                     self.xbmcShutdown(1)
                     xbmc.executebuiltin('Shutdown')
+                    exit()
                 else:
-                    self._idletime = self.settings['MinUserInactivity']
                     self.xbmcNotify(message=message)
+                    xbmc.sleep(2000)
+                    self.xbmcNotify(title="Auto shutdown activated", message="Will shutdown ASAP")
+                    with open('/tmp/shutdownrequest','w') as f:
+                        f.write("1")
                     exit()
         except:
             print "no sys.arg[1] found"
@@ -68,52 +72,66 @@ class Main:
             except:
                 xbmc.executebuiltin(u"Notification('Error','can't write MinEventTimeout')")
         self._manualStart = self.ask_vdrshutdown.ManualStart()
-        if not self._manualStart:
-            while not (self._isPlaying or self._lastIdleTime < self._IdleTime()):
-                xbmc.sleep(self._sleep_interval)
-                self.xbmcShutdown(1)
-                self.xbmcStatus(0)
-                self._lastIdleTime = self._idleTime
-                self._idleTime = xbmc.getGlobalIdleTime()
-                self.idleCheck(0)
-                xbmc.sleep(self._sleep_interval*6)
-        
-        self.xbmcShutdown(0)
-        self.xbmcStatus(1)
-        # main loop
+        self.debug("Manual Start: %s"%( self._manualStart))
         while (not xbmc.abortRequested):
-            self.getSettings()
-            self.updateVDRSettings()
-            # time warp calculations demands to have our own idle timers
-            self._lastIdleTime = self._idleTime
-            self.debug("lastIdleTime = %s"%self._lastIdleTime)
-            self._idleTime = xbmc.getGlobalIdleTime()
-            if (self._idleTime > self._lastIdleTime):
-                self._realIdleTime = self._realIdleTime + (self._idleTime - self._lastIdleTime)
-            else:
-                self._realIdleTime = self._idleTime
-
-            # notice changes in playback
-            self._lastPlaying = self._isPlaying
-            self._isPlaying = xbmc.Player().isPlaying()
+            if self._manualStart == False or self._exitrequested == 1:
+                self.debug("Mode: Timer start or exit requested")
+                self._idleTime = 0
+                while not (self._isPlaying):
+                    self.debug("trying to shutdown XBMC")
+                    self.xbmcShutdown(1)
+                    self.xbmcStatus(0)
+                    self._lastIdleTime = self._idleTime
+                    self._idleTime = xbmc.getGlobalIdleTime()
+                    if self._idleTime <= self._lastIdleTime:
+                        break
+                    self.idleCheck(0)
+                    interval = self._sleep_interval
+                    self.debug(interval)
+                    xbmc.sleep(self._sleep_interval)
+                self._exitrequested = 0
+                self.xbmcNotify(message="Autoshutdown aborted")
+                with open('/tmp/shutdownrequest','w') as f:
+                        f.write("0")
             
-            # now this one is tricky: a playback ended, idle would suggest to powersave, but we set the clock back for overrun. 
-            # Otherwise xbmc could sleep instantly at the end of a movie
-            if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['MinUserInactivity']):
-                self._realIdleTime = self.settings['MinUserInactivity'] - self.settings['overrun']
-                self.debug("vdr.powersave: playback stopped!")
-            # powersave checks ...
-            self.debug(self._counter)
-            if (self._realIdleTime + 120 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
-                self.xbmcStatus(0)
-                idle, message = self.getVDRidle()
-                if idle and int(self.settings['MinUserInactivity']) - int(self._realIdleTime) >= 0:
-                    self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
-                if (self._realIdleTime >= self.settings['MinUserInactivity']):
-            	    self.idleCheck(self.settings['MinUserInactivity'])
-                xbmc.sleep(self._sleep_interval/2)
-            else:
-                xbmc.sleep(self._sleep_interval)
+            self.xbmcShutdown(0)
+            self.xbmcStatus(1)
+            # main loop+
+            while self._exitrequested == 0:
+                self.getSettings()
+                self.updateVDRSettings()
+                # time warp calculations demands to have our own idle timers
+                self._lastIdleTime = self._idleTime
+                self.debug("lastIdleTime = %s"%self._lastIdleTime)
+                self._idleTime = xbmc.getGlobalIdleTime()
+                if (self._idleTime > self._lastIdleTime):
+                    self._realIdleTime = self._realIdleTime + (self._idleTime - self._lastIdleTime)
+                else:
+                    self._realIdleTime = self._idleTime
+
+                # notice changes in playback
+                self._lastPlaying = self._isPlaying
+                self._isPlaying = xbmc.Player().isPlaying()
+                
+                # now this one is tricky: a playback ended, idle would suggest to powersave, but we set the clock back for overrun. 
+                # Otherwise xbmc could sleep instantly at the end of a movie
+                if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['MinUserInactivity']):
+                    self._realIdleTime = self.settings['MinUserInactivity'] - self.settings['overrun']
+                    self.debug("vdr.powersave: playback stopped!")
+                # powersave checks ...
+                if (self._realIdleTime + 60 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
+                    self.xbmcStatus(0)
+                    idle, message = self.getVDRidle()
+                    if idle and int(self.settings['MinUserInactivity']) - int(self._realIdleTime) >= 0:
+                        self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
+                    if (self._realIdleTime >= self.settings['MinUserInactivity']):
+                	    self.idleCheck(self.settings['MinUserInactivity'])
+                    xbmc.sleep(self._sleep_interval/2)
+                else:
+                    xbmc.sleep(self._sleep_interval)
+                with open('/tmp/shutdownrequest','r') as f:
+                    #print "EXITREQUESTED = %s"%(bool(f.read()))
+                    self._exitrequested = int(f.read())
 
         self.debug("vdr.yavdrtools: Plugin exit on request")
         exit()
@@ -190,9 +208,6 @@ class Main:
         '''ask if VDR is ready to shutdown via dbus2vdr-plugin'''
         self.bus = dbus.SystemBus()
         self.proxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
-        #self.msgproxy =  self.bus.get_object("de.tvdr.vdr","/Skin")
-        #self.send_message = dbus.Interface(self.msgproxy, "de.tvdr.vdr.skin")
-        #/Skin skin.QueueMessage string:'message text'
         self.ask_vdridle = dbus.Interface(self.proxy,"de.tvdr.vdr.shutdown")
         status, message, code, msg = self.ask_vdridle.ConfirmShutdown(mode)
         self.debug("VDR returned: %s"%status)
@@ -201,8 +216,6 @@ class Main:
             self.debug("VDR ready to shutdown")
             return True, message
         else:
-            #xbmc.executebuiltin("Notification('yaVDR Tools',%s)"%(message))
-            #self.send_message.QueueMessage(message)
             self.debug("VDR not ready to shutdown")
             self.debug("got answer: %s: %s"%(status, message))
             if int(status) == 903:

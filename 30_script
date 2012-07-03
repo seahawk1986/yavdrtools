@@ -1,7 +1,10 @@
 script
 # log the status with which we left xbmc
 logger -t "XBMC" "XBMC exit with exit status $EXIT_STATUS, $EXIT_SIGNAL, ENV: $(env) ."
-
+# kill xbmc.bin ghost process
+if pidof xbmc.bin &> /dev/null ; then
+	killall -9 xbmc.bin ||:
+fi
 # in case we want to shutdown do it, else make sure default rate is set in all cases
 case $EXIT_STATUS in
     64|66)
@@ -39,10 +42,7 @@ case $EXIT_STATUS in
         esac
         ;;
 esac
-# kill xbmc.bin ghost process
-if pidof xbmc.bin &> /dev/null ; then
-	killall -9 xbmc.bin ||:
-fi
+
 #clean up
 rm -f /tmp/xbmc-active
 rm -f /tmp/xbmc-shutdown
