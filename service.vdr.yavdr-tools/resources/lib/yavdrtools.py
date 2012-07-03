@@ -136,7 +136,7 @@ class Main:
         exit()
         
     def idleCheck(self, timeout):
-        if self.settings['active'] == "true":
+        if self.settings['active'] == "true" and self.MinUserInactivity > 0:
             self.debug("powersafe-check, timeout is set to %s"%(timeout))
             # sleeping time already?
             if (self._isPlaying) or (self._realIdleTime <= timeout):
