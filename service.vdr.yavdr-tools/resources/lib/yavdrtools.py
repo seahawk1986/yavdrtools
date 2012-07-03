@@ -37,6 +37,26 @@ class Main:
         self.MinEventTimeout, max, message = self.vdrSetupValue.Get('MinEventTimeout')
         self.debug("VDR UserInactivity: %s"%(self.MinUserInactivity))
         self.debug("XBMC UserInactivity: %s"%(int(self.settings['MinUserInactivity'])/60))
+        
+        # Check if Addon called by RunScript(script[,args]*)
+        try:
+            if sys.argv[1] == "check":
+                self.xbmcNotify(message="Shutdown requested, probing VDR")
+                oldstatus = self.xbmcStatus
+                self.xbmcStatus(0)
+                idle, message = self.getVDRidle()
+                if idle:
+                    self.xbmcNotify(message="Shutdown initiated")
+                    xbmc.sleep(1)
+                    self.xbmcShutdown(1)
+                    xbmc.executebuiltin('Shutdown')
+                else:
+                    self._idletime = self.settings['MinUserInactivity']
+                    self.xbmcNotify(message=message)
+                    exit()
+        except:
+            print "no sys.arg[1] found"
+
         if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
             try:
                 Addon.setSetting(id="MinUserInactivity", value=str(self.MinUserInactivity))
@@ -84,9 +104,10 @@ class Main:
                 self.debug("vdr.powersave: playback stopped!")
             # powersave checks ...
             self.debug(self._counter)
-            if (self._realIdleTime + 60 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
+            if (self._realIdleTime + 120 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
                 self.xbmcStatus(0)
-                if self.getVDRidle():
+                idle, message = self.getVDRidle()
+                if idle and int(self.settings['MinUserInactivity']) - int(self._realIdleTime) >= 0:
                     self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
                 if (self._realIdleTime >= self.settings['MinUserInactivity']):
             	    self.idleCheck(self.settings['MinUserInactivity'])
@@ -108,7 +129,7 @@ class Main:
             else:
                 self.xbmcStatus(0)
                 self.debug("ask if VDR is ready to shutdown")
-                vdridle = self.getVDRidle()
+                vdridle, message = self.getVDRidle()
                 if vdridle:
                     self.xbmcShutdown(1)
                     self.xbmcNotify('Point of no return', 'Good Bye')
@@ -148,7 +169,7 @@ class Main:
     def xbmcNotify(self, title="yaVDR Tools",  message="Test"):
         """Send Notication to User via XBMC"""
         if self.settings['notifications'] == "true":
-            xbmc.executebuiltin(u"Notification('%s','%s')"%(title,message))
+            xbmc.executebuiltin(u"Notification(%s,%s)"%(title,message))
 
     def debug(self, message):
         '''write debug messages to xbmc.log'''
@@ -169,7 +190,7 @@ class Main:
         '''ask if VDR is ready to shutdown via dbus2vdr-plugin'''
         self.bus = dbus.SystemBus()
         self.proxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
-        self.msgproxy =  self.bus.get_object("de.tvdr.vdr","/Skin")
+        #self.msgproxy =  self.bus.get_object("de.tvdr.vdr","/Skin")
         #self.send_message = dbus.Interface(self.msgproxy, "de.tvdr.vdr.skin")
         #/Skin skin.QueueMessage string:'message text'
         self.ask_vdridle = dbus.Interface(self.proxy,"de.tvdr.vdr.shutdown")
@@ -178,10 +199,10 @@ class Main:
         if int(status) in [250,990]:
             self._VDRisidle = True
             self.debug("VDR ready to shutdown")
-            return True
+            return True, message
         else:
             #xbmc.executebuiltin("Notification('yaVDR Tools',%s)"%(message))
-            self.send_message.QueueMessage(message)
+            #self.send_message.QueueMessage(message)
             self.debug("VDR not ready to shutdown")
             self.debug("got answer: %s: %s"%(status, message))
             if int(status) == 903:
@@ -191,5 +212,5 @@ class Main:
                 self.debug("VDR recording is pending")
             elif int(status) in [905,906]:
                 self.debug("VDR plugin is active")
-            return False
+            return False, message
             
