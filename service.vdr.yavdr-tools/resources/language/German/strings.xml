@@ -3,13 +3,21 @@
     <string id="30000">VDR Host</string>
     <string id="30001">SVDRP-Port</string>
     <string id="30002">Aufwach-Vorlauf vor Aufzeichnung</string>
-    <string id="30003">Aufwach-Kommando (cmd [timestamp])</string>
-    <string id="30010">Abmelden bei Untätigkeit</string>
-    <string id="30011">Abmelden nach</string>
+    <string id="30003">Sonstiges</string>
+    <string id="30010">DVB</string>
+    <string id="30011">Aufnahme</string>
     <string id="30012">Energiesparen</string>
     <string id="30013">Abschalten bei Inaktivität in Minuten</string>
     <string id="30014">Verzögere Ausschalten nach Wiedergabe</string>
     <string id="30015">Brückenzeit zwischen Timern in Minuten</string>
     <string id="30020">Abschalten bei Inaktivität</string>
     <string id="30021">Meldungen anzeigen</string>
+    <string id="30022">Vorlauf zu Timerbeginn (min)<string>
+    <string id="30023">Nachlauf am Timer-Ende (min)<string>
+    <string id="30024">Vorlauf zu Timerbeginn (min)<string>
+    <string id="30025">Nachlauf am Timer-Ende (min)<string>
+    <string id="30024">Default-Priorität<string>
+    <string id="30025">Default-Lebensdauer (d)<string>
+    <string id="30026">Dump NALU Fill data<string>
+    <string id="30027">Max. Video Datei Größe<string>
 </strings>

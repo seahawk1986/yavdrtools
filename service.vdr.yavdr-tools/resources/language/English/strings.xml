@@ -3,13 +3,19 @@
     <string id="30000">VDR Host</string>
     <string id="30001">SVDRP-Port</string>
     <string id="30002">Wakeup before record</string>
-    <string id="30003">Wakeuptime command (cmd [timestamp])</string>
-    <string id="30010">Logout when idle</string>
-    <string id="30011">Logout after</string>
+    <string id="30003">Others</string>
+    <string id="30010">DVB</string>
+    <string id="30011">Recording</string>
     <string id="30012">Powersave</string>
     <string id="30013">Initiate Powersafe after</string>
     <string id="30014">Wait for powersafe after XBMC-playback</string>
     <string id="30015">Stay awake if next timer starts in</string>
     <string id="30020">Powersafe when idle (all values in minutes)</string>
     <string id="30021">Enable notifications</string>
+    <string id="30022">Margin at start (min)<string>
+    <string id="30023">Margin at stop (min)<string>
+    <string id="30024">Default priority<string>
+    <string id="30025">Default lifetime(d)<string>
+    <string id="30026">Dump NALU Fill data<string>
+    <string id="30027">Max. video file size<string>
 </strings>

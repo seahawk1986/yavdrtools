@@ -8,4 +8,12 @@
    <setting id="enable_notifications" type="bool" label="30021" default="false" />
    <setting id="enable_debug" type="bool" label="Debug" default="false" />
  </category>
+ <category label="30011">
+   <setting id="MarginStart" type="number" label="30022" default="2" option="int" />
+   <setting id="MarginStop" type="number" label="30023" default="10" option="int"/>   
+   <setting id="DefaultPriority" type="number" label="30024" default="50" option="int"/>
+   <setting id="DefaultLifetime" type="number" label="30025" default=99 option="int"/>
+   <setting id="DumpNaluFill" type="bool" label="30026" default="true" />
+   <setting id="MaxVideoFileSize" type="bool" label="30027" default="false" />
+ </category>
 </settings>
