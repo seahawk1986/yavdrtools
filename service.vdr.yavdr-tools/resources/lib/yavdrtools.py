@@ -40,6 +40,7 @@ class Main:
         # Check if Addon called by RunScript(script[,args]*)
         try:
             if sys.argv[1] == "check":
+                self.debug("External Shutdown Request")
                 self.xbmcNotify(message="Shutdown requested, probing VDR")
                 oldstatus = self.xbmcStatus
                 self.xbmcStatus(0)
@@ -58,7 +59,7 @@ class Main:
                         f.write("1")
                     exit()
         except:
-            print "no sys.arg[1] found"
+            self.debug("no sys.arg[1] found - Addon was started by XBMC")
 
         if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
             try:
