@@ -32,12 +32,8 @@ class Main:
         self.setupproxy = self.bus.get_object("de.tvdr.vdr","/Setup")
         self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
         self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
-        # get VDR setup vars
-  
-        for i in self.Options:
-            value, max, message = self.vdrSetupValue.Get(i)
-            setattr(self,i,value)
-            self.debug("%s: %s"%(i, value))
+        # get VDR setup vars 
+        self.getVDRSettings()
 
         with open('/tmp/shutdownrequest','w') as f:
                         f.write("0") 
@@ -184,7 +180,7 @@ class Main:
     def updateVDRSettings(self):
         for i in self.Options:
             if self.Options[i] == 'si':
-                print "checking %s"%i
+                self.debug("checking %s"%i)
                 if i == "MinUserInactivity" or i == "overrun":
                     # needed because those values are handled in seconds within this script
                     if int(self.settings[i])/60 != eval("self.%s"%i):
