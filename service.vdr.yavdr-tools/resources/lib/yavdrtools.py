@@ -23,7 +23,7 @@ class Main:
     # main routine
     def __init__(self):
         self.Options = {'MinUserInactivity':'si','MinEventTimeout':'si','MarginStart':'si','MarginStop':'si','DefaultPriority':'si',
-            'DefaultLifeTime':'si','MaxVideoFileSize':'si'}
+            'MaxVideoFileSize':'si'} #'DefaultLifetime':'si',
         self.getSettings()
         self.debug("Plugin started")
         # define dbus2vdr communication elements
@@ -32,17 +32,13 @@ class Main:
         self.setupproxy = self.bus.get_object("de.tvdr.vdr","/Setup")
         self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
         self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
-        # get inactivity timeouts
-        
-            
+        # get VDR setup vars
+  
         for i in self.Options:
             value, max, message = self.vdrSetupValue.Get(i)
             setattr(self,i,value)
-            print i, value
-        #self.MinUserInactivity, max, message = self.vdrSetupValue.Get('MinUserInactivity')
-        #self.MinEventTimeout, max, message = self.vdrSetupValue.Get('MinEventTimeout')
-        self.debug("VDR UserInactivity: %s"%(self.MinUserInactivity))
-        self.debug("XBMC UserInactivity: %s"%(int(self.settings['MinUserInactivity'])/60))
+            self.debug("%s: %s"%(i, value))
+
         with open('/tmp/shutdownrequest','w') as f:
                         f.write("0") 
         # Check if Addon called by RunScript(script[,args]*)
@@ -188,27 +184,33 @@ class Main:
     def updateVDRSettings(self):
         for i in self.Options:
             if self.Options[i] == 'si':
-                if i == "MinUserInactivity":
-                    if int(self.settings['MinUserInactivity'])/60 != self.MinUserInactivity:
-                        val = int(self.settings['MinUserInactivity'])/60
-                        self.setVDRSetting("MinUserInactivity", val)
-                        self.debug("changed MinUserInactivity to %s"%(int(self.settings['MinUserInactivity'])/60))
-                        self.MinUserInactivity = int(self.settings['MinUserInactivity'])/60
+                print "checking %s"%i
+                if i == "MinUserInactivity" or i == "overrun":
+                    # needed because those values are handled in seconds within this script
+                    if int(self.settings[i])/60 != eval("self.%s"%i):
+                        val = int(self.settings[i])/60
+                        self.setVDRSetting(i, val)
+                        self.debug("changed %s to %s"%(i,int(self.settings['MinUserInactivity'])/60))
+                        self.MinUserInactivity = int(self.settings[i])/60
+                        changed = True
                 else:
+                    print "normal Option"
                     if int(self.settings[i]) != eval("self.%s"%i):
-                        self.setVDRSetting("MinUserInactivity", int(self.settings[i], self.Options[i]))
+                        self.setVDRSetting(i, int(self.settings[i]), self.Options[i])
                         self.debug("changed %s to %s"%(i,self.settings[i]))
-	'''if int(self.settings['MinUserInactivity'])/60 != self.MinUserInactivity:
-            val = int(self.settings['MinUserInactivity'])/60
-            self.setVDRSetting("MinUserInactivity", val)
-            self.debug("changed MinUserInactivity to %s"%(int(self.settings['MinUserInactivity'])/60))
-            self.MinUserInactivity = int(self.settings['MinUserInactivity'])/60
-        if int(self.settings['MinEventTimeout'])/60 != self.MinEventTimeout:
-            aval = int(self.settings['MinEventTimeout'])/60
-            self.setVDRSetting('MinEventTimeout', aval)
-            self.debug("changed MinEventTimeout to %s"%(int(self.settings['MinEventTimeout']/60)))
-            self.MinEventTimeout = int(self.settings['MinEventTimeout'])/60'''
-    
+                        changed = True
+        try:
+            if changed:
+                # Update VDR settings
+                self.getVDRSettings()
+        except: pass
+            
+    def getVDRSettings(self):
+        for i in self.Options:
+            value, max, message = self.vdrSetupValue.Get(i)
+            setattr(self,i,value)
+            self.debug("%s: %s"%(i, value))
+
     def setVDRSetting(self, setting, value, sig="si"):
         """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""
         answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))

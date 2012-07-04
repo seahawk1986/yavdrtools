@@ -17,5 +17,5 @@
     <string id="30024">Default-Priorität</string>
     <string id="30025">Default-Lebensdauer (d)</string>
     <string id="30026">Dump NALU Fill data</string>
-    <string id="30027">Max. Video Datei Größe</string>
+    <string id="30027">Max. Video Datei Größe (MB)</string>
 </strings>
