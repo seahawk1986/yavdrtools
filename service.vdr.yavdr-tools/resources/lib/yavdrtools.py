@@ -73,7 +73,7 @@ class Main:
         self._manualStart = self.ask_vdrshutdown.ManualStart()
         self.debug("Manual Start: %s"%( self._manualStart))
         while (not xbmc.abortRequested):
-            if (self._manualStart == False and self.MinEventTimeout > 0) or self._exitrequested == 1:
+            if (self._manualStart == False and self.settings('MinEventTimeout') > 0) or self._exitrequested == 1:
                 self.debug("Mode: Timer start or exit requested")
                 self._idleTime = 0
                 while not (self._isPlaying):
@@ -99,38 +99,39 @@ class Main:
             while self._exitrequested == 0:
                 self.getSettings()
                 self.updateVDRSettings()
-                # time warp calculations demands to have our own idle timers
-                self._lastIdleTime = self._idleTime
-                self.debug("lastIdleTime = %s"%self._lastIdleTime)
-                self._idleTime = xbmc.getGlobalIdleTime()
-                if (self._idleTime > self._lastIdleTime):
-                    self._realIdleTime = self._realIdleTime + (self._idleTime - self._lastIdleTime)
-                else:
-                    self._realIdleTime = self._idleTime
+                if self.settings['MinUserInactivity'] > 0:
+                    # time warp calculations demands to have our own idle timers
+                    self._lastIdleTime = self._idleTime
+                    self.debug("lastIdleTime = %s"%self._lastIdleTime)
+                    self._idleTime = xbmc.getGlobalIdleTime()
+                    if (self._idleTime > self._lastIdleTime):
+                        self._realIdleTime = self._realIdleTime + (self._idleTime - self._lastIdleTime)
+                    else:
+                        self._realIdleTime = self._idleTime
 
-                # notice changes in playback
-                self._lastPlaying = self._isPlaying
-                self._isPlaying = xbmc.Player().isPlaying()
-                
-                # now this one is tricky: a playback ended, idle would suggest to powersave, but we set the clock back for overrun. 
-                # Otherwise xbmc could sleep instantly at the end of a movie
-                if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['MinUserInactivity']):
-                    self._realIdleTime = self.settings['MinUserInactivity'] - self.settings['overrun']
-                    self.debug("vdr.powersave: playback stopped!")
-                # powersave checks ...
-                if (self._realIdleTime + 60 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
-                    self.xbmcStatus(0)
-                    idle, message = self.getVDRidle()
-                    if idle and int(self.settings['MinUserInactivity']) - int(self._realIdleTime) >= 0:
-                        self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
-                    if (self._realIdleTime >= self.settings['MinUserInactivity']):
-                	    self.idleCheck(self.settings['MinUserInactivity'])
-                    xbmc.sleep(self._sleep_interval/2)
-                else:
-                    xbmc.sleep(self._sleep_interval)
-                with open('/tmp/shutdownrequest','r') as f:
-                    #print "EXITREQUESTED = %s"%(bool(f.read()))
-                    self._exitrequested = int(f.read())
+                    # notice changes in playback
+                    self._lastPlaying = self._isPlaying
+                    self._isPlaying = xbmc.Player().isPlaying()
+                    
+                    # now this one is tricky: a playback ended, idle would suggest to powersave, but we set the clock back for overrun. 
+                    # Otherwise xbmc could sleep instantly at the end of a movie
+                    if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['MinUserInactivity']):
+                        self._realIdleTime = self.settings['MinUserInactivity'] - self.settings['overrun']
+                        self.debug("vdr.powersave: playback stopped!")
+                    # powersave checks ...
+                    if (self._realIdleTime + 60 >= self.settings['MinUserInactivity']) and self._isPlaying == False:
+                        self.xbmcStatus(0)
+                        idle, message = self.getVDRidle()
+                        if idle and int(self.settings['MinUserInactivity']) - int(self._realIdleTime) >= 0:
+                            self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
+                        if (self._realIdleTime >= self.settings['MinUserInactivity']):
+                    	    self.idleCheck(self.settings['MinUserInactivity'])
+                        xbmc.sleep(self._sleep_interval/2)
+                    else:
+                        xbmc.sleep(self._sleep_interval)
+                    with open('/tmp/shutdownrequest','r') as f:
+                        #print "EXITREQUESTED = %s"%(bool(f.read()))
+                        self._exitrequested = int(f.read())
 
         self.debug("vdr.yavdrtools: Plugin exit on request")
         exit()
