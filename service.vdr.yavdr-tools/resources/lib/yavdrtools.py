@@ -132,6 +132,8 @@ class Main:
                     with open('/tmp/shutdownrequest','r') as f:
                         #print "EXITREQUESTED = %s"%(bool(f.read()))
                         self._exitrequested = int(f.read())
+                else:
+                    xbmc.sleep(self._sleep_interval)
 
         self.debug("vdr.yavdrtools: Plugin exit on request")
         exit()
