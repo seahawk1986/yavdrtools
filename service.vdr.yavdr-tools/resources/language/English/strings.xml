@@ -12,10 +12,10 @@
     <string id="30015">Stay awake if next timer starts in</string>
     <string id="30020">Powersafe when idle (all values in minutes)</string>
     <string id="30021">Enable notifications</string>
-    <string id="30022">Margin at start (min)<string>
-    <string id="30023">Margin at stop (min)<string>
-    <string id="30024">Default priority<string>
-    <string id="30025">Default lifetime(d)<string>
-    <string id="30026">Dump NALU Fill data<string>
-    <string id="30027">Max. video file size<string>
+    <string id="30022">Margin at start (min)</string>
+    <string id="30023">Margin at stop (min)</string>
+    <string id="30024">Default priority</string>
+    <string id="30025">Default lifetime(d)</string>
+    <string id="30026">Dump NALU Fill data</string>
+    <string id="30027">Max. video file size</string>
 </strings>
