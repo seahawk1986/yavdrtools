@@ -14,8 +14,6 @@
     <string id="30021">Meldungen anzeigen</string>
     <string id="30022">Vorlauf zu Timerbeginn (min)</string>
     <string id="30023">Nachlauf am Timer-Ende (min)</string>
-    <string id="30024">Vorlauf zu Timerbeginn (min)</string>
-    <string id="30025">Nachlauf am Timer-Ende (min)</string>
     <string id="30024">Default-Priorität</string>
     <string id="30025">Default-Lebensdauer (d)</string>
     <string id="30026">Dump NALU Fill data</string>

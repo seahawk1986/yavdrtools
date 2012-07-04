@@ -22,6 +22,8 @@ class Main:
 
     # main routine
     def __init__(self):
+        self.Options = {'MinUserInactivity':'si','MinEventTimeout':'si','MarginStart':'si','MarginStop':'si','DefaultPriority':'si',
+            'DefaultLifeTime':'si','MaxVideoFileSize':'si'}
         self.getSettings()
         self.debug("Plugin started")
         # define dbus2vdr communication elements
@@ -31,8 +33,14 @@ class Main:
         self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
         self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
         # get inactivity timeouts
-        self.MinUserInactivity, max, message = self.vdrSetupValue.Get('MinUserInactivity')
-        self.MinEventTimeout, max, message = self.vdrSetupValue.Get('MinEventTimeout')
+        
+            
+        for i in self.Options:
+            value, max, message = self.vdrSetupValue.Get(i)
+            setattr(self,i,value)
+            print i, value
+        #self.MinUserInactivity, max, message = self.vdrSetupValue.Get('MinUserInactivity')
+        #self.MinEventTimeout, max, message = self.vdrSetupValue.Get('MinEventTimeout')
         self.debug("VDR UserInactivity: %s"%(self.MinUserInactivity))
         self.debug("XBMC UserInactivity: %s"%(int(self.settings['MinUserInactivity'])/60))
         with open('/tmp/shutdownrequest','w') as f:
@@ -164,14 +172,33 @@ class Main:
         '''get settings from xbmc'''
         self.settings = {}
         self.settings['overrun'] = self._enum_overrun[int(Addon.getSetting('overrun'))] * 60
-        self.settings['MinUserInactivity'] = int(Addon.getSetting('MinUserInactivity'))*60
-        self.settings['MinEventTimeout'] = int(Addon.getSetting('MinEventTimeout'))*60
+        #self.settings['MinUserInactivity'] = int(Addon.getSetting('MinUserInactivity'))*60
+        #self.settings['MinEventTimeout'] = int(Addon.getSetting('MinEventTimeout'))*60
         self.settings['active'] = Addon.getSetting('enable_timeout')
         self.settings['notifications'] = Addon.getSetting('enable_notifications')
         self.settings['debug'] = Addon.getSetting('enable_debug')
+        for i in self.Options:
+            if self.Options[i] == "si":
+                print i
+                self.settings[i] = int(Addon.getSetting(i))
+            else:
+                self.settings[i] = Addon.getSetting(i)
+        self.settings['MinUserInactivity'] = self.settings['MinUserInactivity']*60
 
     def updateVDRSettings(self):
-	if int(self.settings['MinUserInactivity'])/60 != self.MinUserInactivity:
+        for i in self.Options:
+            if self.Options[i] == 'si':
+                if i == "MinUserInactivity":
+                    if int(self.settings['MinUserInactivity'])/60 != self.MinUserInactivity:
+                        val = int(self.settings['MinUserInactivity'])/60
+                        self.setVDRSetting("MinUserInactivity", val)
+                        self.debug("changed MinUserInactivity to %s"%(int(self.settings['MinUserInactivity'])/60))
+                        self.MinUserInactivity = int(self.settings['MinUserInactivity'])/60
+                else:
+                    if int(self.settings[i]) != eval("self.%s"%i):
+                        self.setVDRSetting("MinUserInactivity", int(self.settings[i], self.Options[i]))
+                        self.debug("changed %s to %s"%(i,self.settings[i]))
+	'''if int(self.settings['MinUserInactivity'])/60 != self.MinUserInactivity:
             val = int(self.settings['MinUserInactivity'])/60
             self.setVDRSetting("MinUserInactivity", val)
             self.debug("changed MinUserInactivity to %s"%(int(self.settings['MinUserInactivity'])/60))
@@ -180,7 +207,7 @@ class Main:
             aval = int(self.settings['MinEventTimeout'])/60
             self.setVDRSetting('MinEventTimeout', aval)
             self.debug("changed MinEventTimeout to %s"%(int(self.settings['MinEventTimeout']/60)))
-            self.MinEventTimeout = int(self.settings['MinEventTimeout'])/60
+            self.MinEventTimeout = int(self.settings['MinEventTimeout'])/60'''
     
     def setVDRSetting(self, setting, value, sig="si"):
         """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""
