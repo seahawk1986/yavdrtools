@@ -73,6 +73,7 @@ class Main:
                     try:
                     	if Addon.getSetting(i) in ["false","true"]:
                     	    state = str(bool(getattr(self,i))).lower()
+                    	    print "setting %s to %s"%(i,state)
                             Addon.setSetting(id=i,value=str(state))
                         else:
                             Addon.setSetting(id=i,value=str(getattr(self,i)))
@@ -180,15 +181,15 @@ class Main:
         for i in self.Options:
             if self.Options[i] == "si":
                 if Addon.getSetting(i) in ["false","true"]:
-                    self.settings[i] = bool(eval(Addon.getSetting(i).capitalize()))
+                    self.settings[i] = int(bool(eval(Addon.getSetting(i).capitalize())))
                 else:
                     self.settings[i] = int(Addon.getSetting(i))
             else:
                 if Addon.getSetting(i) in ["false","true"]:
-                    self.settings[i] = bool(eval(Addon.getSetting(i).capitalize()))
+                    self.settings[i] = int(bool(eval(Addon.getSetting(i).capitalize())))
                 else:
                     self.settings[i] = Addon.getSetting(i)
-            self.debug("%s: %s"%(i,self.settings[i]))
+            self.debug("XBMC-Settings %s: %s"%(i,self.settings[i]))
         self.settings['MinUserInactivity'] = self.settings['MinUserInactivity']*60
 
     def updateVDRSettings(self):
