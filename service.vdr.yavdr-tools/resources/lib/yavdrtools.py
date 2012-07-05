@@ -80,13 +80,9 @@ class Main:
                         Addon.setSetting(id=i,value=str(getattr(self,i)))
                     except:
                         xbmc.executebuiltin(u"Notification('Error','can't write %s')"%i)
-        """if self.settings['MinEventTimeout']/60 != self.MinEventTimeout:
-            try:
-                Addon.setSetting(id="MinEventTimeout", value=str(self.MinEventTimeout))
-            except:
-                xbmc.executebuiltin(u"Notification('Error','can't write MinEventTimeout')")"""
         self._manualStart = self.ask_vdrshutdown.ManualStart()
         self.debug("Manual Start: %s"%( self._manualStart))
+
         while (not xbmc.abortRequested):
             if (self._manualStart == False and self.settings('MinEventTimeout') > 0) or self._exitrequested == 1:
                 self.debug("Mode: Timer start or exit requested")
@@ -185,10 +181,18 @@ class Main:
         self.settings['debug'] = Addon.getSetting('enable_debug')
         for i in self.Options:
             if self.Options[i] == "si":
-                print i
-                self.settings[i] = int(Addon.getSetting(i))
+                if Addon.getSetting(i) in ["false","true"]:
+                    print "got %s"%(Addon.getSetting(i))
+                    self.settings[i] = bool(eval(Addon.getSetting(i).capitalize()))
+                else:
+                    self.settings[i] = int(Addon.getSetting(i))
             else:
-                self.settings[i] = Addon.getSetting(i)
+                if Addon.getSetting(i) in ["false","true"]:
+                    print "got %s"%(Addon.getSetting(i))
+                    self.settings[i] = bool(eval(Addon.getSetting(i).capitalize()))
+                else:
+                    self.settings[i] = Addon.getSetting(i)
+            print "%s: %s"%(i,self.settings[i])
         self.settings['MinUserInactivity'] = self.settings['MinUserInactivity']*60
 
     def updateVDRSettings(self):
@@ -217,9 +221,11 @@ class Main:
             
     def getVDRSettings(self):
         for i in self.Options:
-            value, max, message = self.vdrSetupValue.Get(i)
-            setattr(self,i,value)
-            self.debug("%s: %s"%(i, value))
+            answer = self.vdrSetupValue.Get(i)
+
+            #value, code, message = self.vdrSetupValue.Get(i)
+            setattr(self,i,answer[0])
+            self.debug("%s: %s"%(i, answer[0]))
 
     def setVDRSetting(self, setting, value, sig="si"):
         """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""

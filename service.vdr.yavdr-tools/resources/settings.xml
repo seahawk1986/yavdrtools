@@ -2,9 +2,9 @@
 <settings>
  <category label="30012">
    <setting id="enable_timeout" type="bool" label="30020" default="true" />
-   <setting id="MinUserInactivity" type="number" label="30013" subsetting="true" default=300 option="int" enable="eq(-1,true)"/>   
+   <setting id="MinUserInactivity" type="number" label="30013" subsetting="true" default="300" option="int" enable="eq(-1,true)"/>   
    <setting id="overrun" type="enum" label="30014" subsetting="true" values="1 Min|2 Min|5 Min|10 Min|15 Min|20 Min" default="2" enable="eq(-2,true)"/>
-   <setting id="MinEventTimeout" type="number" label="30015" subsetting="true" default=30 option="int"/>
+   <setting id="MinEventTimeout" type="number" label="30015" subsetting="true" default="30" option="int"/>
    <setting id="enable_notifications" type="bool" label="30021" default="false" />
    <setting id="enable_debug" type="bool" label="Debug" default="false" />
  </category>
