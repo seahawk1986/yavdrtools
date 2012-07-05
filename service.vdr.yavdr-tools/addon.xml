@@ -11,7 +11,7 @@
     <platform>linux</platform>
     <summary lang="en">Experimental service for yaVDR to allow coordinated shutdown and powersave for XBMC and VDR</summary>
     <summary lang="de">Experimenteller Service für yaVDR um das Herunterfahren/Energiesparen von XBMC und VDR zu koordinieren</summary>
-    <description lang="en">This service handles automated powersave and wakeup operations, in cooperation with a VDR backend. You will find details in the "Changelog"</description>
-    <description lang="de">Dieser Dienst koordiniert das Ausschalten von VDR und XBMC.</description>
+    <description lang="en">This service handles automated powersave and wakeup operations harmonized with a VDR backend. Also some of VDR's options can be set by this addon.</description>
+    <description lang="de">Dieser Dienst koordiniert das Ausschalten und Aufwachen von VDR und XBMC. Darüberhinaus können einige Optionen des VDR aus XBMC heraus verändert werden.</description>
     </extension>
 </addon>
