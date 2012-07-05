@@ -34,7 +34,7 @@ class Main:
         'DefaultPriority':'si',
         'MaxVideoFileSize':'si',
         'DefaultLifetime':'si',
-        'DumpNaluFill':'ss',
+        #'DumpNaluFill':'ss',
         'EPGScanTimeout':'si',
         'SetSystemTime':'si',
         'DiSEqC':'si',

@@ -13,7 +13,7 @@
    <setting id="MarginStop" type="number" label="30023" default="10" option="int"/>   
    <setting id="DefaultPriority" type="number" label="30024" default="50" option="int"/>
    <setting id="DefaultLifetime" type="number" label="30025" default="99" option="int"/>
-   <setting id="DumpNaluFill" type="bool" label="30026" default="true" />
+   <!--<setting id="DumpNaluFill" type="bool" label="30026" default="true" />-->
    <setting id="MaxVideoFileSize" type="number" label="30027" default="2000" option="int" />
  </category>
  <category label="30002">
