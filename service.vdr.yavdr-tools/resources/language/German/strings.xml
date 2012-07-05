@@ -4,7 +4,7 @@
     <string id="30001">SVDRP-Port</string>
     <string id="30002">EPG</string>
     <string id="30003">Sonstiges</string>
-    <string id="30010">DVB</string>
+    <string id="30010">LNB</string>
     <string id="30011">Aufnahme</string>
     <string id="30012">Energiesparen</string>
     <string id="30013">Abschalten bei Inaktivität in Minuten</string>
@@ -20,4 +20,6 @@
     <string id="30027">Max. Video Datei Größe (MB)</string>
     <string id="30028">Systemzeit stellen</string>
     <string id="30029">Zeit bis zur EPG-Aktualisierung (h)</string>
+    <string id="30030">DiSEqC benutzen</string>
+    <string id="30031">Notausstieg</string>
 </strings>

@@ -4,7 +4,7 @@
     <string id="30001">SVDRP-Port</string>
     <string id="30002">EPG</string>
     <string id="30003">Others</string>
-    <string id="30010">DVB</string>
+    <string id="30010">LNB</string>
     <string id="30011">Recording</string>
     <string id="30012">Powersave</string>
     <string id="30013">Initiate Powersafe after</string>
@@ -20,4 +20,6 @@
     <string id="30027">Max. video file size (MB)</string>
     <string id="30028">Set system time</string>
     <string id="30029">EPG scan timeout (h)</string>
+    <string id="30030">Use DiSEqC</string>
+    <string id="30031">Emergency exit</string>
 </strings>

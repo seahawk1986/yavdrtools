@@ -22,8 +22,12 @@ class Main:
 
     # main routine
     def __init__(self):
+        # all options within this dict will be synced to VDR
+        # important: id within settings.xml must match variable name in vdr's setup.conf
+        # Be sure to send the datatypes needed by the dbus2vdr plugin for each setting
+        # each dict entry needs this sytax: '<Variable Name>':'<dbus data types ('si'=string, integer; 'ss'=string, string>')>'
         self.Options = {'MinUserInactivity':'si','MinEventTimeout':'si','MarginStart':'si','MarginStop':'si','DefaultPriority':'si',
-            'MaxVideoFileSize':'si','DefaultLifetime':'si','DumpNaluFill':'ss','EPGScanTimeout':'si','SetSystemTime':'si'}
+            'MaxVideoFileSize':'si','DefaultLifetime':'si','DumpNaluFill':'ss','EPGScanTimeout':'si','SetSystemTime':'si','DiSEqC':'si','EmergencyExit':'si'}
         self.getSettings()
         self.debug("Plugin started")
         # define dbus2vdr communication elements

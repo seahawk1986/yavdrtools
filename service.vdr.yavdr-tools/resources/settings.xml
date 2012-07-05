@@ -19,6 +19,11 @@
  <category label="30002">
    <setting id="EPGScanTimeout" type="number" label="30029" default="5" />
    <setting id="SetSystemTime" type="bool" label="30028" default="false" />
-   
+ </category>
+ <category label="30010">
+   <setting id="DiSEqC" type="bool" label="30030" default="false" />
+ </category>
+ <category label="30003">
+   <setting id="EmergencyExit" type="bool" label="30031" default="true" />
  </category>
 </settings>
