@@ -200,7 +200,10 @@ class Main:
                     changed = True
             else:
                 if int(self.settings[i]) != getattr(self,i):
-                    self.setVDRSetting(i, int(self.settings[i]), self.Options[i])
+                    if self.Options[i] == 'si':
+                        self.setVDRSetting(i, int(self.settings[i]), self.Options[i])
+                    elif self.Options[i] == 'ss':
+                        self.setVDRSetting(i, self.settings[i], self.Options[i])
                     self.debug("changed %s to %s"%(i,self.settings[i]))
                     changed = True
             #if self.Options[i] == 'ss':
