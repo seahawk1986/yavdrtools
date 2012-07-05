@@ -26,8 +26,20 @@ class Main:
         # important: id within settings.xml must match variable name in vdr's setup.conf
         # Be sure to send the datatypes needed by the dbus2vdr plugin for each setting
         # each dict entry needs this sytax: '<Variable Name>':'<dbus data types ('si'=string, integer; 'ss'=string, string>')>'
-        self.Options = {'MinUserInactivity':'si','MinEventTimeout':'si','MarginStart':'si','MarginStop':'si','DefaultPriority':'si',
-            'MaxVideoFileSize':'si','DefaultLifetime':'si','DumpNaluFill':'ss','EPGScanTimeout':'si','SetSystemTime':'si','DiSEqC':'si','EmergencyExit':'si'}
+        self.Options = {
+        'MinUserInactivity':'si',
+        'MinEventTimeout':'si',
+        'MarginStart':'si',
+        'MarginStop':'si',
+        'DefaultPriority':'si',
+        'MaxVideoFileSize':'si',
+        'DefaultLifetime':'si',
+        'DumpNaluFill':'ss',
+        'EPGScanTimeout':'si',
+        'SetSystemTime':'si',
+        'DiSEqC':'si',
+        'EmergencyExit':'si'
+        }
         self.getSettings()
         self.debug("Plugin started")
         #self.setupdbus()
@@ -59,26 +71,8 @@ class Main:
                     exit()
         except:
             self.debug("no sys.arg[1] found - Addon was started by XBMC")
-
-        for i in self.Options:
-            if i == 'MinUserInactivity':
-                if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
-                    try:
-                        Addon.setSetting(id="MinUserInactivity", value=str(self.MinUserInactivity))
-                    except:
-                        xbmc.executebuiltin(u"Notification('Error','can't write MinUserInactivity')")
-            else:
-                if self.settings[i] != getattr(self,i):
-                    self.debug("Value for %s in VDR does not match value in XBMC, setting XBMC to VDR's value"%(i))
-                    try:
-                    	if Addon.getSetting(i) in ["false","true"]:
-                    	    state = str(bool(getattr(self,i))).lower()
-                    	    print "setting %s to %s"%(i,state)
-                            Addon.setSetting(id=i,value=str(state))
-                        else:
-                            Addon.setSetting(id=i,value=str(getattr(self,i)))
-                    except:
-                        xbmc.executebuiltin(u"Notification('Error','can't write %s')"%i)
+        self.updateXBMCSettings()
+        
         self._manualStart = self.ask_vdrshutdown.ManualStart()
         self.debug("Manual Start: %s"%( self._manualStart))
 
@@ -194,27 +188,50 @@ class Main:
 
     def updateVDRSettings(self):
         for i in self.Options:
-            if self.Options[i] == 'si':
+            #if self.Options[i] == 'si':
                 #self.debug("checking %s"%i)
-                if i == "MinUserInactivity" or i == "overrun":
-                    # needed because those values are handled in seconds within this script
-                    if int(self.settings[i])/60 != getattr(self,i):
-                        val = int(self.settings[i])/60
-                        self.setVDRSetting(i, val)
-                        self.debug("changed %s to %s"%(i,int(self.settings['MinUserInactivity'])/60))
-                        self.MinUserInactivity = int(self.settings[i])/60
-                        changed = True
-                else:
-                    # normal Option
-                    if int(self.settings[i]) != getattr(self,i):
-                        self.setVDRSetting(i, int(self.settings[i]), self.Options[i])
-                        self.debug("changed %s to %s"%(i,self.settings[i]))
-                        changed = True
+            if i == "MinUserInactivity" or i == "overrun":
+                # needed because those values are handled in seconds within this script
+                if int(self.settings[i])/60 != getattr(self,i):
+                    val = int(self.settings[i])/60
+                    self.setVDRSetting(i, val)
+                    self.debug("changed %s to %s"%(i,int(self.settings['MinUserInactivity'])/60))
+                    self.MinUserInactivity = int(self.settings[i])/60
+                    changed = True
+            else:
+                if int(self.settings[i]) != getattr(self,i):
+                    self.setVDRSetting(i, int(self.settings[i]), self.Options[i])
+                    self.debug("changed %s to %s"%(i,self.settings[i]))
+                    changed = True
+            #if self.Options[i] == 'ss':
+            #    pass
+                
         try:
             if changed:
                 # Update VDR settings
                 self.getVDRSettings()
         except: pass
+        
+    def updateXBMCSettings(self):
+        for i in self.Options:
+            if i == 'MinUserInactivity':
+                if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
+                    try:
+                        Addon.setSetting(id="MinUserInactivity", value=str(self.MinUserInactivity))
+                    except:
+                        xbmc.executebuiltin(u"Notification('Error','can't write MinUserInactivity')")
+            else:
+                if self.settings[i] != getattr(self,i):
+                    self.debug("Value for %s in VDR does not match value in XBMC, setting XBMC to VDR's value"%(i))
+                    try:
+                    	if Addon.getSetting(i) in ["false","true"]:
+                    	    state = str(bool(getattr(self,i))).lower()
+                    	    print "setting %s to %s"%(i,state)
+                            Addon.setSetting(id=i,value=str(state))
+                        else:
+                            Addon.setSetting(id=i,value=str(getattr(self,i)))
+                    except:
+                        xbmc.executebuiltin(u"Notification('Error','can't write %s')"%i)
             
     def getVDRSettings(self):
         self.setupdbus()
