@@ -194,7 +194,7 @@ class Main:
                 # needed because those values are handled in seconds within this script
                 if int(self.settings[i])/60 != getattr(self,i):
                     val = int(self.settings[i])/60
-                    self.setVDRSetting(i, val)
+                    self.setVDRSetting(i, val, self.Options[i])
                     self.debug("changed %s to %s"%(i,int(self.settings['MinUserInactivity'])/60))
                     self.MinUserInactivity = int(self.settings[i])/60
                     changed = True
@@ -203,6 +203,7 @@ class Main:
                     if self.Options[i] == 'si':
                         self.setVDRSetting(i, int(self.settings[i]), sig=self.Options[i])
                     elif self.Options[i] == 'ss':
+                        print "setting %s to %s, signature=%s"%(i,self.settings[i],self.Options[i])
                         self.setVDRSetting(i, self.settings[i], sig=self.Options[i])
                     self.debug("changed %s to %s"%(i,self.settings[i]))
                     changed = True
@@ -261,7 +262,7 @@ class Main:
                 error = True
         return True
 
-    def setVDRSetting(self, setting, value, sig="si"):
+    def setVDRSetting(self, setting, value, sig):
         """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""
         try:
             if sig == 'si':
