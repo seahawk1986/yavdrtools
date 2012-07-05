@@ -264,6 +264,7 @@ class Main:
 
     def setVDRSetting(self, setting, value, sig):
         """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""
+        print "received signature %s"%sig
         try:
             if sig == 'si':
         	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
@@ -273,7 +274,10 @@ class Main:
             self.xbmcNotify(title="dbus connection broken",message="will try to reconnect in 10s")
             self.setupdbus()
         finally:
-            answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+            if sig == 'si':
+        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+    	    elif sig == 'ss':
+    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sig))
 	
         self.debug(answer)
 
