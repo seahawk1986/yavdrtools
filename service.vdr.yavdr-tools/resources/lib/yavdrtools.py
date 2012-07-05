@@ -30,12 +30,7 @@ class Main:
             'MaxVideoFileSize':'si','DefaultLifetime':'si','DumpNaluFill':'ss','EPGScanTimeout':'si','SetSystemTime':'si','DiSEqC':'si','EmergencyExit':'si'}
         self.getSettings()
         self.debug("Plugin started")
-        # define dbus2vdr communication elements
-        self.bus = dbus.SystemBus()
-        self.shutdownproxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
-        self.setupproxy = self.bus.get_object("de.tvdr.vdr","/Setup")
-        self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
-        self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
+        #self.setupdbus()
         # get VDR setup vars 
         self.getVDRSettings()
 
@@ -186,17 +181,15 @@ class Main:
         for i in self.Options:
             if self.Options[i] == "si":
                 if Addon.getSetting(i) in ["false","true"]:
-                    print "got %s"%(Addon.getSetting(i))
                     self.settings[i] = bool(eval(Addon.getSetting(i).capitalize()))
                 else:
                     self.settings[i] = int(Addon.getSetting(i))
             else:
                 if Addon.getSetting(i) in ["false","true"]:
-                    print "got %s"%(Addon.getSetting(i))
                     self.settings[i] = bool(eval(Addon.getSetting(i).capitalize()))
                 else:
                     self.settings[i] = Addon.getSetting(i)
-            print "%s: %s"%(i,self.settings[i])
+            self.debug("%s: %s"%(i,self.settings[i]))
         self.settings['MinUserInactivity'] = self.settings['MinUserInactivity']*60
 
     def updateVDRSettings(self):
@@ -224,31 +217,37 @@ class Main:
         except: pass
             
     def getVDRSettings(self):
+        self.setupdbus()
         for i in self.Options:
             answer = self.vdrSetupValue.Get(i)
 
             #value, code, message = self.vdrSetupValue.Get(i)
             setattr(self,i,answer[0])
             self.debug("%s: %s"%(i, answer[0]))
+            
+    def setupdbus(self):
+        error = True
+        while error == True:
+            try:
+                self.bus = dbus.SystemBus()
+                self.shutdownproxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
+                self.setupproxy = self.bus.get_object("de.tvdr.vdr","/Setup")
+                self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
+                self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
+                error = False
+            except:
+                self.debug("could not connect to dbus object of vdr, sleep for 10s")
+                xbmc.sleep(10000)
+                error = True
+        return True
 
     def setVDRSetting(self, setting, value, sig="si"):
         """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""
         try:
         	answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
         except:
-            error = True
-            while error == True:
-                try:
-                    self.bus = dbus.SystemBus()
-                    self.shutdownproxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
-                    self.setupproxy = self.bus.get_object("de.tvdr.vdr","/Setup")
-                    self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
-                    self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
-                    error = False
-                except:
-                    self.debug("could not connect to dbus object of vdr, sleep for 10s")
-                    xbmc.sleep(10000)
-                    error = True
+            self.xbmcNotify(title="dbus connection broken",message="will try to reconnect in 10s")
+            self.setupdbus()
         finally:
             answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
 	
