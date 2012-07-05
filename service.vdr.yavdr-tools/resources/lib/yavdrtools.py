@@ -60,11 +60,6 @@ class Main:
         except:
             self.debug("no sys.arg[1] found - Addon was started by XBMC")
 
-        if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
-            try:
-                Addon.setSetting(id="MinUserInactivity", value=str(self.MinUserInactivity))
-            except:
-                xbmc.executebuiltin(u"Notification('Error','can't write MinUserInactivity')") 
         for i in self.Options:
             if i == 'MinUserInactivity':
                 if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
