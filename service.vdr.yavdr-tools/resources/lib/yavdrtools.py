@@ -23,7 +23,7 @@ class Main:
     # main routine
     def __init__(self):
         self.Options = {'MinUserInactivity':'si','MinEventTimeout':'si','MarginStart':'si','MarginStop':'si','DefaultPriority':'si',
-            'MaxVideoFileSize':'si'} #'DefaultLifetime':'si',
+            'MaxVideoFileSize':'si','DefaultLifetime':'si','DumpNaluFill':'ss','EPGScanTimeout':'si','SetSystemTime':'si'}
         self.getSettings()
         self.debug("Plugin started")
         # define dbus2vdr communication elements
@@ -66,11 +66,25 @@ class Main:
                 Addon.setSetting(id="MinUserInactivity", value=str(self.MinUserInactivity))
             except:
                 xbmc.executebuiltin(u"Notification('Error','can't write MinUserInactivity')") 
-        if self.settings['MinEventTimeout']/60 != self.MinEventTimeout:
+        for i in self.Options:
+            if i == 'MinUserInactivity':
+                if self.settings['MinUserInactivity']/60 !=  self.MinUserInactivity:
+                    try:
+                        Addon.setSetting(id="MinUserInactivity", value=str(self.MinUserInactivity))
+                    except:
+                        xbmc.executebuiltin(u"Notification('Error','can't write MinUserInactivity')")
+            else:
+                if self.settings[i] != getattr(self,i):
+                    self.debug("Value for %s in VDR does not match value in XBMC, setting XBMC to VDR's value"%(i))
+                    try:
+                        Addon.setSetting(id=i,value=str(getattr(self,i)))
+                    except:
+                        xbmc.executebuiltin(u"Notification('Error','can't write %s')"%i)
+        """if self.settings['MinEventTimeout']/60 != self.MinEventTimeout:
             try:
                 Addon.setSetting(id="MinEventTimeout", value=str(self.MinEventTimeout))
             except:
-                xbmc.executebuiltin(u"Notification('Error','can't write MinEventTimeout')")
+                xbmc.executebuiltin(u"Notification('Error','can't write MinEventTimeout')")"""
         self._manualStart = self.ask_vdrshutdown.ManualStart()
         self.debug("Manual Start: %s"%( self._manualStart))
         while (not xbmc.abortRequested):
@@ -180,7 +194,7 @@ class Main:
     def updateVDRSettings(self):
         for i in self.Options:
             if self.Options[i] == 'si':
-                self.debug("checking %s"%i)
+                #self.debug("checking %s"%i)
                 if i == "MinUserInactivity" or i == "overrun":
                     # needed because those values are handled in seconds within this script
                     if int(self.settings[i])/60 != eval("self.%s"%i):
@@ -190,7 +204,7 @@ class Main:
                         self.MinUserInactivity = int(self.settings[i])/60
                         changed = True
                 else:
-                    print "normal Option"
+                    # normal Option
                     if int(self.settings[i]) != eval("self.%s"%i):
                         self.setVDRSetting(i, int(self.settings[i]), self.Options[i])
                         self.debug("changed %s to %s"%(i,self.settings[i]))
@@ -209,7 +223,25 @@ class Main:
 
     def setVDRSetting(self, setting, value, sig="si"):
         """Set VDR setting via dbus. Needs setting name, setting value and datatypes"""
-        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+        try:
+        	answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+        except:
+            error = True
+            while error == True:
+                try:
+                    self.bus = dbus.SystemBus()
+                    self.shutdownproxy = self.bus.get_object("de.tvdr.vdr","/Shutdown")
+                    self.setupproxy = self.bus.get_object("de.tvdr.vdr","/Setup")
+                    self.ask_vdrshutdown = dbus.Interface(self.shutdownproxy,"de.tvdr.vdr.shutdown")
+                    self.vdrSetupValue = dbus.Interface(self.setupproxy,"de.tvdr.vdr.setup")
+                    error = False
+                except:
+                    self.debug("could not connect to dbus object of vdr, sleep for 10s")
+                    xbmc.sleep(10000)
+                    error = True
+        finally:
+            answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+	
         self.debug(answer)
 
     def xbmcNotify(self, title="yaVDR Tools",  message="Test"):

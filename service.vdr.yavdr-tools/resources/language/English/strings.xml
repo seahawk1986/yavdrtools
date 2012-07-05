@@ -2,7 +2,7 @@
 <strings>
     <string id="30000">VDR Host</string>
     <string id="30001">SVDRP-Port</string>
-    <string id="30002">Wakeup before record</string>
+    <string id="30002">EPG</string>
     <string id="30003">Others</string>
     <string id="30010">DVB</string>
     <string id="30011">Recording</string>
@@ -18,4 +18,6 @@
     <string id="30025">Default lifetime(d)</string>
     <string id="30026">Dump NALU Fill data</string>
     <string id="30027">Max. video file size (MB)</string>
+    <string id="30028">Set system time</string>
+    <string id="30029">EPG scan timeout (h)</string>
 </strings>
