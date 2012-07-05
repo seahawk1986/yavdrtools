@@ -198,7 +198,7 @@ class Main:
                 #self.debug("checking %s"%i)
                 if i == "MinUserInactivity" or i == "overrun":
                     # needed because those values are handled in seconds within this script
-                    if int(self.settings[i])/60 != eval("self.%s"%i):
+                    if int(self.settings[i])/60 != getattr(self,i):
                         val = int(self.settings[i])/60
                         self.setVDRSetting(i, val)
                         self.debug("changed %s to %s"%(i,int(self.settings['MinUserInactivity'])/60))
@@ -206,7 +206,7 @@ class Main:
                         changed = True
                 else:
                     # normal Option
-                    if int(self.settings[i]) != eval("self.%s"%i):
+                    if int(self.settings[i]) != getattr(self,i):
                         self.setVDRSetting(i, int(self.settings[i]), self.Options[i])
                         self.debug("changed %s to %s"%(i,self.settings[i]))
                         changed = True
