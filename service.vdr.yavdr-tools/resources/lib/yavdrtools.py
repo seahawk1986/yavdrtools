@@ -71,7 +71,11 @@ class Main:
                 if self.settings[i] != getattr(self,i):
                     self.debug("Value for %s in VDR does not match value in XBMC, setting XBMC to VDR's value"%(i))
                     try:
-                        Addon.setSetting(id=i,value=str(getattr(self,i)))
+                    	if Addon.getSetting(i) in ["false","true"]:
+                    	    state = str(bool(getattr(self,i))).lower()
+                            Addon.setSetting(id=i,value=str(state))
+                        else:
+                            Addon.setSetting(id=i,value=str(getattr(self,i)))
                     except:
                         xbmc.executebuiltin(u"Notification('Error','can't write %s')"%i)
         self._manualStart = self.ask_vdrshutdown.ManualStart()
