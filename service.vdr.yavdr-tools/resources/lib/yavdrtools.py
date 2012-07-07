@@ -3,7 +3,7 @@ import sys, os, socket, time
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 import dbus, subprocess
 
-Addon = xbmcaddon.Addon(id="vdr.yavdrtools")
+Addon = xbmcaddon.Addon(id="service.vdr.yavdrtools")
 gls = Addon.getLocalizedString
 
 class Main:
