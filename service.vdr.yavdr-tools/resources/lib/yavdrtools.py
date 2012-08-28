@@ -77,7 +77,7 @@ class Main:
         self.debug("Manual Start: %s"%( self._manualStart))
 
         while (not xbmc.abortRequested):
-            if (self._manualStart == False and self.settings('MinEventTimeout') > 0) or self._exitrequested == 1:
+            if (self._manualStart == False and self.settings['MinEventTimeout'] > 0) or self._exitrequested == 1:
                 self.debug("Mode: Timer start or exit requested")
                 self._idleTime = 0
                 while not (self._isPlaying):
