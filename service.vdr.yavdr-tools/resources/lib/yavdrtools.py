@@ -25,7 +25,8 @@ class Main:
         # all options within this dict will be synced to VDR
         # important: id within settings.xml must match variable name in vdr's setup.conf
         # Be sure to send the datatypes needed by the dbus2vdr plugin for each setting
-        # each dict entry needs this sytax: '<Variable Name>':'<dbus data types ('si'=string, integer; 'ss'=string, string>')>'
+        # each dict entry needs this sytax:
+        # '<Variable Name>':'<dbus data types ('si'=string, integer; 'ss'=string, string>')>'
         self.Options = {
         'MinUserInactivity':'si',
         'MinEventTimeout':'si',
@@ -34,15 +35,13 @@ class Main:
         'DefaultPriority':'si',
         'MaxVideoFileSize':'si',
         'DefaultLifetime':'si',
-        #'DumpNaluFill':'ss',
         'EPGScanTimeout':'si',
         'SetSystemTime':'si',
         'DiSEqC':'si',
         'EmergencyExit':'si'
         }
         self.getSettings()
-        self.debug("Plugin started")
-        #self.setupdbus()
+        self.debug("yavdr-tools started")
         # get VDR setup vars
         self.getVDRSettings()
 
@@ -77,7 +76,9 @@ class Main:
         self.debug("Manual Start: %s"%( self._manualStart))
 
         while (not xbmc.abortRequested):
-            if (self._manualStart == False and self.settings['MinEventTimeout'] > 0) or self._exitrequested == 1:
+            if (self._manualStart == False and
+                self.settings['MinEventTimeout'] > 0
+                ) or self._exitrequested == 1:
                 self.debug("Mode: Timer start or exit requested")
                 self._idleTime = 0
                 while not (self._isPlaying):
@@ -129,7 +130,7 @@ class Main:
                         if idle and int(self.settings['MinUserInactivity']) - int(self._realIdleTime) >= 0:
                             self.xbmcNotify('Inactivity timeout in %s seconds'%(int(self.settings['MinUserInactivity']) - int(self._realIdleTime)),'press key to abort')
                         if (self._realIdleTime >= self.settings['MinUserInactivity']):
-                    	    self.idleCheck(self.settings['MinUserInactivity'])
+                            self.idleCheck(self.settings['MinUserInactivity'])
                         xbmc.sleep(self._sleep_interval/2)
                     else:
                         xbmc.sleep(self._sleep_interval)
