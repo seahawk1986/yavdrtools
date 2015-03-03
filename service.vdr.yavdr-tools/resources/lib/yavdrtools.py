@@ -43,11 +43,11 @@ class Main:
         self.getSettings()
         self.debug("Plugin started")
         #self.setupdbus()
-        # get VDR setup vars 
+        # get VDR setup vars
         self.getVDRSettings()
 
         with open('/tmp/shutdownrequest','w') as f:
-                        f.write("0") 
+                        f.write("0")
         # Check if Addon called by RunScript(script[,args]*)
         try:
             if sys.argv[1] == "check":
@@ -72,7 +72,7 @@ class Main:
         except:
             self.debug("no sys.arg[1] found - Addon was started by XBMC")
         self.updateXBMCSettings()
-        
+
         self._manualStart = self.ask_vdrshutdown.ManualStart()
         self.debug("Manual Start: %s"%( self._manualStart))
 
@@ -96,7 +96,7 @@ class Main:
                 self.xbmcNotify(message="Autoshutdown aborted")
                 with open('/tmp/shutdownrequest','w') as f:
                         f.write("0")
-            
+
             self.xbmcShutdown(0)
             self.xbmcStatus(1)
             # main loop+
@@ -116,8 +116,8 @@ class Main:
                     # notice changes in playback
                     self._lastPlaying = self._isPlaying
                     self._isPlaying = xbmc.Player().isPlaying()
-                    
-                    # now this one is tricky: a playback ended, idle would suggest to powersave, but we set the clock back for overrun. 
+
+                    # now this one is tricky: a playback ended, idle would suggest to powersave, but we set the clock back for overrun.
                     # Otherwise xbmc could sleep instantly at the end of a movie
                     if (self._lastPlaying  == True) & (self._isPlaying == False) & (self._realIdleTime >= self.settings['MinUserInactivity']):
                         self._realIdleTime = self.settings['MinUserInactivity'] - self.settings['overrun']
@@ -141,7 +141,7 @@ class Main:
 
         self.debug("vdr.yavdrtools: Plugin exit on request")
         exit()
-        
+
     def idleCheck(self, timeout):
         if self.settings['active'] == "true" and self.MinUserInactivity > 0:
             self.debug("powersafe-check, timeout is set to %s"%(timeout))
@@ -162,7 +162,7 @@ class Main:
                 else:
                     self.xbmcShutdown(0)
                     return False
-    
+
     def getSettings(self):
         '''get settings from xbmc'''
         self.settings = {}
@@ -209,13 +209,13 @@ class Main:
                     changed = True
             #if self.Options[i] == 'ss':
             #    pass
-                
+
         try:
             if changed:
                 # Update VDR settings
                 self.getVDRSettings()
         except: pass
-        
+
     def updateXBMCSettings(self):
         for i in self.Options:
             if i == 'MinUserInactivity':
@@ -236,7 +236,7 @@ class Main:
                             Addon.setSetting(id=i,value=str(getattr(self,i)))
                     except:
                         xbmc.executebuiltin(u"Notification('Error','can't write %s')"%i)
-            
+
     def getVDRSettings(self):
         self.setupdbus()
         for i in self.Options:
@@ -245,7 +245,7 @@ class Main:
             #value, code, message = self.vdrSetupValue.Get(i)
             setattr(self,i,answer[0])
             self.debug("%s: %s"%(i, answer[0]))
-            
+
     def setupdbus(self):
         error = True
         while error == True:
@@ -278,7 +278,7 @@ class Main:
         	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
     	    elif sig == 'ss':
     	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sig))
-	
+
         self.debug(answer)
 
     def xbmcNotify(self, title="yaVDR Tools",  message="Test"):
@@ -290,17 +290,17 @@ class Main:
         '''write debug messages to xbmc.log'''
         if self.settings['debug'] == "true":
             print "debug vdr.yavdrtools: %s"%(message)
-    
+
     def xbmcStatus(self, status):
         self._xbmcStatus = status
         with open("/tmp/xbmc-active","w") as active:
                         active.write(unicode(status))
-                        
+
     def xbmcShutdown(self, status):
         self._xbmcShutdown = status
         with open("/tmp/xbmc-shutdown","w") as shutdown:
                         shutdown.write(unicode(status))
-            
+
     def getVDRidle(self, mode=True):
         '''ask if VDR is ready to shutdown via dbus2vdr-plugin'''
         self.bus = dbus.SystemBus()
@@ -323,4 +323,4 @@ class Main:
             elif int(status) in [905,906]:
                 self.debug("VDR plugin is active")
             return False, message
-            
+
