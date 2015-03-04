@@ -299,9 +299,9 @@ class Main:
             self.setupdbus()
         finally:
             if sig == 'si':
-        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sv))
+        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature="sv"))
     	    elif sig == 'ss':
-    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sv))
+    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature="sv"))
 	
         self.debug(answer)
 
