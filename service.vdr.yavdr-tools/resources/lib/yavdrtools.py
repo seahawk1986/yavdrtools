@@ -3,12 +3,12 @@ import sys, os, socket, time
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 import dbus, subprocess
 
-Addon = xbmcaddon.Addon(id="service.vdr.yavdrtools")
+Addon = xbmcaddon.Addon(id="vdr.yavdrtools")
 gls = Addon.getLocalizedString
 
 class Main:
     _enum_overrun = [1,2,5,10,15,20]
-    _sleep_interval = 10000
+    _sleep_interval = 6000 #10000
     _counter = 0
     _idleTime = 0
     _lastIdleTime = 0
@@ -54,6 +54,8 @@ class Main:
                 self.debug("External Shutdown Request")
                 self.xbmcNotify(message="Shutdown requested, probing VDR")
                 oldstatus = self.xbmcStatus
+                if xbmc.Player().isPlaying():
+                    xbmc.Player().stop()
                 self.xbmcStatus(0)
                 idle, message = self.getVDRidle()
                 if idle:
@@ -69,9 +71,20 @@ class Main:
                     with open('/tmp/shutdownrequest','w') as f:
                         f.write("1")
                     exit()
+            
+            elif sys.argv[1] == "quit":
+                self.debug("Quit request")
+                if xbmc.Player().isPlaying():
+                    xbmc.Player().stop()
+                xbmc.sleep(1000)
+                xbmc.executebuiltin('Quit')
+                exit()
+                        
         except:
             self.debug("no sys.arg[1] found - Addon was started by XBMC")
         self.updateXBMCSettings()
+        
+        
         
         self._manualStart = self.ask_vdrshutdown.ManualStart()
         self.debug("Manual Start: %s"%( self._manualStart))
@@ -116,6 +129,16 @@ class Main:
                     # notice changes in playback
                     self._lastPlaying = self._isPlaying
                     self._isPlaying = xbmc.Player().isPlaying()
+                    #print self._isPlaying
+                    #print self.settings['livetv_on']
+                    if self._isPlaying and xbmc.Player().getPlayingFile().startswith("pvr://channels/") and self.settings['livetv_on']=="true":
+                        self.debug("ignoring Player activity for LiveTV")
+                        self._isPlaying = False
+                    #try:
+                    #if xbmc.Player().isPlaying():
+                    #  self.debug("Playing %s"%(xbmc.Player().getPlayingFile()))
+                    #except:
+                    #  pass
                     
                     # now this one is tricky: a playback ended, idle would suggest to powersave, but we set the clock back for overrun. 
                     # Otherwise xbmc could sleep instantly at the end of a movie
@@ -169,6 +192,7 @@ class Main:
         self.settings['overrun'] = self._enum_overrun[int(Addon.getSetting('overrun'))] * 60
         #self.settings['MinUserInactivity'] = int(Addon.getSetting('MinUserInactivity'))*60
         #self.settings['MinEventTimeout'] = int(Addon.getSetting('MinEventTimeout'))*60
+        self.settings['livetv_on'] = Addon.getSetting('livetv_on')
         self.settings['active'] = Addon.getSetting('enable_timeout')
         self.settings['notifications'] = Addon.getSetting('enable_notifications')
         self.settings['debug'] = Addon.getSetting('enable_debug')
@@ -267,17 +291,17 @@ class Main:
         print "received signature %s"%sig
         try:
             if sig == 'si':
-        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sv))
     	    elif sig == 'ss':
-    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sig))
+    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sv))
         except:
             self.xbmcNotify(title="dbus connection broken",message="will try to reconnect in 10s")
             self.setupdbus()
         finally:
             if sig == 'si':
-        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sig))
+        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sv))
     	    elif sig == 'ss':
-    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sig))
+    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sv))
 	
         self.debug(answer)
 
