@@ -291,9 +291,9 @@ class Main:
         print "received signature %s"%sig
         try:
             if sig == 'si':
-        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature=sv))
+        	    answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.Int32(value), signature="sv"))
     	    elif sig == 'ss':
-    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature=sv))
+    	        answer = unicode(self.vdrSetupValue.Set(dbus.String(setting), dbus.String(value), signature="sv"))
         except:
             self.xbmcNotify(title="dbus connection broken",message="will try to reconnect in 10s")
             self.setupdbus()
