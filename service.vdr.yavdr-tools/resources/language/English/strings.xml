@@ -7,10 +7,10 @@
     <string id="30010">LNB</string>
     <string id="30011">Recording</string>
     <string id="30012">Powersave</string>
-    <string id="30013">Initiate Powersafe after</string>
-    <string id="30014">Wait for powersafe after XBMC-playback</string>
+    <string id="30013">Initiate power-saving after</string>
+    <string id="30014">Wait for powersaving after XBMC-playback</string>
     <string id="30015">Stay awake if next timer starts in</string>
-    <string id="30020">Powersafe when idle (all values in minutes)</string>
+    <string id="30020">Power-saving when idle (all values in minutes)</string>
     <string id="30021">Enable notifications</string>
     <string id="30022">Margin at start (min)</string>
     <string id="30023">Margin at stop (min)</string>
